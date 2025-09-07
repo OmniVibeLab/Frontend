@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Bell, UserPlus, Heart, MessageCircle } from "lucide-react";
+import { Bell, UserPlus, Heart, MessageCircle, Compass } from "lucide-react";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    // Replace this with API call if needed
     setNotifications([
       {
         id: 1,
@@ -37,54 +36,65 @@ const Notifications = () => {
   const renderIcon = (type) => {
     switch (type) {
       case "follow":
-        return <UserPlus className="text-black" size={20} />;
+        return <UserPlus className="text-blue-400" size={20} />;
       case "like":
         return <Heart className="text-red-500" size={20} />;
       case "comment":
-        return <MessageCircle className="text-green-500" size={20} />;
+        return <MessageCircle className="text-green-400" size={20} />;
       default:
-        return <Bell className="text-black" size={20} />;
+        return <Bell className="text-gray-400" size={20} />;
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-black">Notifications</h1>
-      <div className="space-y-4">
+    <div className="w-full min-h-screen  p-2 text-white">
+      {/* Header */}
+      <div className="flex items-center gap-2 py-4 px-2 border-b border-gray-700">
+        <Compass size={24} className="text-blue-400" />
+        <p className="text-lg font-semibold">Activity</p>
+      </div>
+
+      {/* Notifications */}
+      <div className="mt-2">
         {notifications.length === 0 && (
-          <p className="text-black">No notifications yet.</p>
+          <p className="text-gray-400 text-center py-4">No notifications yet.</p>
         )}
+
         {notifications.map((notif) => (
           <div
             key={notif.id}
-            className="flex items-center bg-white shadow-md rounded-lg p-4 border border-gray-200"
+            className="flex items-center w-full py-3 px-2 hover:bg-gray-800 transition-colors"
           >
-            <div className="mr-4">{renderIcon(notif.type)}</div>
+            {/* Icon */}
+            <div className="mr-3">{renderIcon(notif.type)}</div>
+
+            {/* Avatar */}
             <img
               src={notif.avatar}
               alt={notif.username}
-              className="w-10 h-10 rounded-full mr-4"
+              className="w-10 h-10 rounded-full mr-3 border border-gray-700"
             />
-            <div className="flex-1 text-black">
+
+            {/* Content */}
+            <div className="flex-1 text-sm">
               {notif.type === "follow" && (
                 <p>
-                  <span className="font-semibold">@{notif.username}</span>{" "}
-                  started following you.
+                  <span className="font-semibold">@{notif.username}</span> started following you.
                 </p>
               )}
               {notif.type === "like" && (
                 <p>
-                  <span className="font-semibold">@{notif.username}</span>{" "}
-                  liked your post: "{notif.post}"
+                  <span className="font-semibold">@{notif.username}</span> liked your post:{" "}
+                  <span className="italic">"{notif.post}"</span>
                 </p>
               )}
               {notif.type === "comment" && (
                 <p>
-                  <span className="font-semibold">@{notif.username}</span>{" "}
-                  commented on your post: "{notif.comment}"
+                  <span className="font-semibold">@{notif.username}</span> commented:{" "}
+                  <span className="italic">"{notif.comment}"</span>
                 </p>
               )}
-              <span className="text-xs text-black">{notif.time}</span>
+              <span className="text-xs text-gray-400">{notif.time}</span>
             </div>
           </div>
         ))}

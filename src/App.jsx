@@ -15,9 +15,8 @@ import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
-import CreatePost from "./pages/CreatePost";
+import CreatePost from "./components/CreatePost";
 import EditProfile from "./pages/EditProfile";
-import Chat from "./pages/Chat";
 
 // Components
 import AppLayout from "./components/AppLayout";
@@ -46,7 +45,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/createpost" element={<CreatePost />} />
           <Route path="/editprofile" element={<EditProfile />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat" element={<Messages />} />
 
           {/* Standalone component routes */}
           <Route path="/postcreator" element={<PostCreator />} />

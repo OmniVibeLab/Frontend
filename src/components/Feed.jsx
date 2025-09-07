@@ -1,93 +1,84 @@
-import React, { useState } from "react";
-import { Heart, Repeat } from "lucide-react";
+// src/components/Feed.jsx
+import React, { useState, useEffect } from "react";
+import PostCard from "./PostCard";
 
-const Feed = ({ posts = [] }) => {
-  if (posts.length === 0) {
-    posts = [
-      {
-        id: 1,
-        user: { name: "Abhaya", username: "abhaya", avatar: "https://placehold.co/600x400" },
-        content: "Just finished my new project 🚀",
-        likes: 24,
-        liked: false,
-        reposts: 2,
-        reposted: false,
-      },
-      {
-        id: 2,
-        user: { name: "Luna", username: "luna", avatar: "https://placehold.co/600x400" },
-        content: "React + Tailwind is awesome! 😎",
-        likes: 12,
-        liked: false,
-        reposts: 0,
-        reposted: false,
-      },
-    ];
-  }
+const Feed = ({ user, refreshTrigger }) => {
+  const [posts, setPosts] = useState([]);
 
-  const [postList, setPostList] = useState(posts);
+  // Fetch posts from backend
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/posts");
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log("Fetched posts:", data); // Debug log
+      setPosts(Array.isArray(data) ? data : []); // Don't reverse, server already sorts by newest first
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+      setPosts([]);
+    }
+  };
 
-  const handleLike = (postId) => {
-    setPostList((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
+  useEffect(() => {
+    fetchPosts();
+  }, [refreshTrigger]); // Refetch when refreshTrigger changes
+
+  const handleLike = (postId, likeCount) => {
+    setPosts((prev) =>
+      Array.isArray(prev) ? prev.map((post) =>
+        post._id === postId
+          ? { ...post, likeCount }
           : post
-      )
+      ) : []
     );
   };
 
-  const handleRepost = (postId) => {
-    setPostList((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? { ...post, reposted: !post.reposted, reposts: post.reposted ? post.reposts - 1 : post.reposts + 1 }
+  const handleRepost = (repostData) => {
+    // Add the repost to the beginning of the feed
+    setPosts((prev) => Array.isArray(prev) ? [repostData, ...prev] : [repostData]);
+  };
+
+  const handleStore = (postId, storeCount) => {
+    setPosts((prev) =>
+      Array.isArray(prev) ? prev.map((post) =>
+        post._id === postId
+          ? { ...post, storeCount }
           : post
-      )
+      ) : []
     );
   };
 
+  const handleComment = (postId) => {
+    // Handle comment functionality if needed
+    console.log('Comment on post:', postId);
+  };
+
+  
   return (
-    <div className="space-y-6">
-      {postList.map((post) => (
-        <div key={post.id} className="bg-white shadow-md rounded-lg p-4">
-          <div className="flex items-center mb-2">
-            <img
-              src={post.user.avatar}
-              alt={post.user.username}
-              className="w-10 h-10 rounded-full mr-3"
-            />
-            <div>
-              <p className="font-semibold text-black">{post.user.name}</p>
-              <p className="text-sm text-gray-500">@{post.user.username}</p>
-            </div>
-          </div>
-
-          <p className="mb-3 text-gray-800">{post.content}</p>
-
-          <div className="flex items-center space-x-6">
-            {/* Like */}
-            <Heart
-              size={24}
-              onClick={() => handleLike(post.id)}
-              className={`cursor-pointer transition-colors ${
-                post.liked ? "text-white bg-red-500 rounded-full p-1" : "text-gray-500"
-              }`}
-            />
-            <span className="text-gray-700">{post.likes}</span>
-
-            {/* Single Repost */}
-            <Repeat
-              size={24}
-              onClick={() => handleRepost(post.id)}
-              className={`cursor-pointer transition-colors ${
-                post.reposted ? "text-white bg-green-500 rounded-full p-1" : "text-gray-500"
-              }`}
-            />
-            <span className="text-gray-700">{post.reposts}</span>
-          </div>
+    <div className="space-y-0">
+      {/* Posts Feed */}
+      {!Array.isArray(posts) || posts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-400 text-lg">No posts yet...</p>
+          <p className="text-gray-500 text-sm mt-2">Be the first to share something!</p>
         </div>
-      ))}
+      ) : (
+        posts.map((post) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            currentUser={user}
+            onLike={handleLike}
+            onRepost={handleRepost}
+            onStore={handleStore}
+            onComment={handleComment}
+          />
+        ))
+      )}
     </div>
   );
 };
